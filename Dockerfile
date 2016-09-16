@@ -14,7 +14,12 @@ RUN echo oracle-java7-installer shared/accepted-oracle-license-v1-1 select true 
 RUN echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | sudo /usr/bin/debconf-set-selections
 
 # Make sure the package repository is up to date, and install packages
-RUN apt-get update && apt-get install -y ansible krb5-user openssh-server oracle-java7-installer oracle-java7-unlimited-jce-policy oracle-java8-installer oracle-java8-set-default oracle-java8-unlimited-jce-policy && apt-get clean
+# this ugliness with python-dev and PIP is required only because Ubuntu 14.04 trusty is missing python-xmltodict as a package.
+# FIXME: upgrade to Ubuntu 16.04 or switch to alpine and see if it has the correct packages available - or use Archlinux. Ugh.
+RUN apt-get update && apt-get install -y ansible krb5-user libkrb5-dev openssh-server oracle-java7-installer oracle-java7-unlimited-jce-policy oracle-java8-installer oracle-java8-set-default oracle-java8-unlimited-jce-policy python-dev python-pip && apt-get clean
+
+# install python packages that we need for ansible and winrm
+RUN pip install kerberos pywinrm xmltodict
 
 # Install a basic SSH server
 RUN sed -i 's|session    required     pam_loginuid.so|session    optional     pam_loginuid.so|g' /etc/pam.d/sshd
