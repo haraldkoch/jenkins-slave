@@ -19,7 +19,7 @@ RUN echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true 
 RUN apt-get update && apt-get install -y ansible krb5-user libkrb5-dev openssh-server oracle-java7-installer oracle-java7-unlimited-jce-policy oracle-java8-installer oracle-java8-set-default oracle-java8-unlimited-jce-policy python-dev python-pip && apt-get clean
 
 # install python packages that we need for ansible and winrm
-RUN pip install kerberos pywinrm xmltodict
+RUN pip install kerberos pywinrm xmltodict requests-kerberos
 
 # Install a basic SSH server
 RUN sed -i 's|session    required     pam_loginuid.so|session    optional     pam_loginuid.so|g' /etc/pam.d/sshd
