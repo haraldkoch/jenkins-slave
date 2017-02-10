@@ -1,8 +1,8 @@
 #!/bin/sh
 
-USERNAME=$0
-IMAGE=$1
-TYPE=$2
+USERNAME=$1
+IMAGE=$2
+TYPE=$3
 
 # ensure we're up to date
 git pull
