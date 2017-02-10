@@ -16,7 +16,9 @@ RUN echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true 
 # Make sure the package repository is up to date, and install packages
 # this ugliness with python-dev and PIP is required only because Ubuntu 14.04 trusty is missing python-xmltodict as a package.
 # FIXME: upgrade to Ubuntu 16.04 or switch to alpine and see if it has the correct packages available - or use Archlinux. Ugh.
-RUN apt-get update && apt-get install -y ansible krb5-user libkrb5-dev openssh-server oracle-java7-installer oracle-java7-unlimited-jce-policy oracle-java8-installer oracle-java8-set-default oracle-java8-unlimited-jce-policy python-dev python-pip && apt-get clean
+
+# Temporary - separate the install of "stable" packages, so that we get a stable cache layer. This is only while we're experimenting with the package list.
+RUN apt-get update && apt-get install -y ansible git krb5-user libkrb5-dev openssh-server oracle-java7-installer oracle-java7-unlimited-jce-policy oracle-java8-installer oracle-java8-set-default oracle-java8-unlimited-jce-policy python-dev python-pip && apt-get clean
 
 # install python packages that we need for ansible and winrm
 RUN pip install kerberos pywinrm xmltodict requests-kerberos
@@ -32,11 +34,22 @@ RUN adduser --quiet jenkins
 RUN echo "jenkins:jenkins" | chpasswd
 
 # install maven
-RUN wget -O /tmp/apache-maven-3.2.2-bin.zip http://archive.apache.org/dist/maven/binaries/apache-maven-3.2.2-bin.zip && \
+RUN wget --progress=dot:mega -O /tmp/apache-maven-3.2.2-bin.zip http://archive.apache.org/dist/maven/binaries/apache-maven-3.2.2-bin.zip && \
 	mkdir -p /home/jenkins/tools/hudson.tasks.Maven_MavenInstallation && \
 	cd /home/jenkins/tools/hudson.tasks.Maven_MavenInstallation && \
 	unzip /tmp/apache-maven-3.2.2-bin.zip && \
 	rm /tmp/apache-maven-3.2.2-bin.zip
+
+RUN wget -O /usr/local/bin/lein https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein && \
+    chmod +x /usr/local/bin/lein && \
+    mkdir -p ~jenkins/.lein/self-installs && \
+    wget --progress=dot:mega -O ~jenkins/.lein/self-installs/leiningen-2.7.1-standalone.jar \
+        https://github.com/technomancy/leiningen/releases/download/2.7.1/leiningen-2.7.1-standalone.zip
+
+# Jenkins is really, really stupid. And developers are too lazy to fix this, apparently.
+RUN ln -s /usr/bin/java /bin/java
+
+COPY VERSION /home/jenkins
 
 RUN chown -R jenkins.jenkins /home/jenkins
 
