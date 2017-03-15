@@ -1,59 +1,52 @@
-# This Dockerfile is used to build an image containing basic stuff to be used as a Jenkins slave build node.
-FROM ubuntu:trusty
+# This Dockerfile is used to build an image containing the software I use for building projects in my jenkins slaves.
+FROM centos:7
 MAINTAINER Harald Koch <harald.koch@gmail.com>
 
-RUN apt-get update && apt-get -y dist-upgrade && apt-get install -y software-properties-common
+EXPOSE 22
+COPY entrypoint.sh /entrypoint.sh
+ENTRYPOINT [ "/entrypoint.sh" ]
 
-# add webupd8team repository
-RUN add-apt-repository -y ppa:webupd8team/java
-# add ansible repository
-RUN add-apt-repository -y ppa:ansible/ansible
-
-# auto-accept Oracle license
-RUN echo oracle-java7-installer shared/accepted-oracle-license-v1-1 select true | sudo /usr/bin/debconf-set-selections
-RUN echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | sudo /usr/bin/debconf-set-selections
-
-# Make sure the package repository is up to date, and install packages
-# this ugliness with python-dev and PIP is required only because Ubuntu 14.04 trusty is missing python-xmltodict as a package.
-# FIXME: upgrade to Ubuntu 16.04 or switch to alpine and see if it has the correct packages available - or use Archlinux. Ugh.
-
-# Temporary - separate the install of "stable" packages, so that we get a stable cache layer. This is only while we're experimenting with the package list.
-RUN apt-get update && apt-get install -y ansible git krb5-user libkrb5-dev openssh-server oracle-java7-installer oracle-java7-unlimited-jce-policy oracle-java8-installer oracle-java8-set-default oracle-java8-unlimited-jce-policy python-dev python-pip && apt-get clean
-
-# install python packages that we need for ansible and winrm
-RUN pip install kerberos pywinrm xmltodict requests-kerberos
+# we need epel-release to get ansible
+RUN yum update -y && \
+    yum -y install epel-release && \
+    yum -y install ansible docker-client git sudo wget unzip openssh-server java-1.7.0-openjdk-devel java-1.8.0-openjdk-devel && \
+    yum clean all
 
 # Install a basic SSH server
 RUN sed -i 's|session    required     pam_loginuid.so|session    optional     pam_loginuid.so|g' /etc/pam.d/sshd
 RUN mkdir -p /var/run/sshd
 
-# Add user jenkins to the image
-RUN adduser --quiet jenkins
+# Add user jenkins to the image. FIXME: figure out a better way to handle
+# group access to the /var/run/docker.sock socket - this group 996 thing is
+# not reliable.
+RUN adduser -G 996 jenkins
 
 # Set password for the jenkins user (you may want to alter this).
 RUN echo "jenkins:jenkins" | chpasswd
 
-# install maven
+# install apache maven
 RUN wget --progress=dot:mega -O /tmp/apache-maven-3.2.2-bin.zip http://archive.apache.org/dist/maven/binaries/apache-maven-3.2.2-bin.zip && \
 	mkdir -p /home/jenkins/tools/hudson.tasks.Maven_MavenInstallation && \
 	cd /home/jenkins/tools/hudson.tasks.Maven_MavenInstallation && \
 	unzip /tmp/apache-maven-3.2.2-bin.zip && \
 	rm /tmp/apache-maven-3.2.2-bin.zip
 
+# install leiningen - Clojure build tool
 RUN wget -O /usr/local/bin/lein https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein && \
     chmod +x /usr/local/bin/lein && \
     mkdir -p ~jenkins/.lein/self-installs && \
     wget --progress=dot:mega -O ~jenkins/.lein/self-installs/leiningen-2.7.1-standalone.jar \
         https://github.com/technomancy/leiningen/releases/download/2.7.1/leiningen-2.7.1-standalone.zip
 
-# Jenkins is really, really stupid. And developers are too lazy to fix this, apparently.
-RUN ln -s /usr/bin/java /bin/java
+# install rancher-compose
+# we use a subdirectory because the rancher-compose tar file includes an entry
+# for "."; extracting it as root disables write access to /tmp. Craziness!!
+RUN wget --progress=dot:mega -O /tmp/rancher-compose-linux-amd64-v0.12.3.tar.gz https://github.com/rancher/rancher-compose/releases/download/v0.12.3/rancher-compose-linux-amd64-v0.12.3.tar.gz && \
+    mkdir /tmp/rc && \
+    tar -C /tmp/rc -xf /tmp/rancher-compose-linux-amd64-v0.12.3.tar.gz && \
+    /bin/mv /tmp/rc/rancher-compose-v0.12.3/rancher-compose /usr/local/bin/rancher-compose && \
+    chmod +x /usr/local/bin/rancher-compose && \
+    /bin/rm -rf /tmp/rc /tmp/rancher-compose-linux-amd64-v0.12.3.tar.gz
 
 COPY VERSION /home/jenkins
-
 RUN chown -R jenkins.jenkins /home/jenkins
-
-# Standard SSH port
-EXPOSE 22
-
-CMD ["/usr/sbin/sshd", "-D"]
