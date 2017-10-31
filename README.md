@@ -25,3 +25,10 @@ It contains various tools that we at UHN typically need to build our projects:
  Then configure the Jenkins Slave launcher with Launch method "Launch slave agents via SSH",
  and configure in your hostname, the external port number, and the jenkins user credentials.
  
+## Building
+
+ `make` will build a new copy of the docker image with the current version tag; `make push` will upload the current image to the Docker Hub.
+
+ `make release` will bump the 'patch' version number (e.g. 1.0.1 becomes 1.0.2).
+
+ This project is currently built automatically using travis-ci also.
