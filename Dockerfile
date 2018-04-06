@@ -16,10 +16,9 @@ RUN yum update -y && \
 RUN sed -i 's|session    required     pam_loginuid.so|session    optional     pam_loginuid.so|g' /etc/pam.d/sshd
 RUN mkdir -p /var/run/sshd
 
-# Add user jenkins to the image. FIXME: figure out a better way to handle
-# group access to the /var/run/docker.sock socket - this group 996 thing is
-# not reliable.
-RUN adduser -G 996 jenkins
+# Add user jenkins to the image.
+# user jenkins is added to the docker group in entrypoint.sh for group access to /var/run/docker.sock
+RUN adduser jenkins
 
 # Set password for the jenkins user (you may want to alter this).
 RUN echo "jenkins:jenkins" | chpasswd
