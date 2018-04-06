@@ -9,23 +9,22 @@ ENTRYPOINT [ "/entrypoint.sh" ]
 # we need epel-release to get ansible
 RUN yum update -y && \
     yum -y install epel-release && \
-    yum -y install ansible docker-client git sudo wget unzip openssh-server java-1.7.0-openjdk-devel java-1.8.0-openjdk-devel && \
+    yum -y install ansible docker-client git sudo wget unzip openssh-server java-1.7.0-openjdk-devel java-1.8.0-openjdk-devel nodejs && \
     yum clean all
 
 # Install a basic SSH server
 RUN sed -i 's|session    required     pam_loginuid.so|session    optional     pam_loginuid.so|g' /etc/pam.d/sshd
 RUN mkdir -p /var/run/sshd
 
-# Add user jenkins to the image. FIXME: figure out a better way to handle
-# group access to the /var/run/docker.sock socket - this group 996 thing is
-# not reliable.
-RUN adduser -G 996 jenkins
+# Add user jenkins to the image.
+# user jenkins is added to the docker group in entrypoint.sh for group access to /var/run/docker.sock
+RUN adduser jenkins
 
 # Set password for the jenkins user (you may want to alter this).
 RUN echo "jenkins:jenkins" | chpasswd
 
 # install apache maven
-RUN wget --progress=dot:mega -O /tmp/apache-maven-3.2.2-bin.zip http://archive.apache.org/dist/maven/binaries/apache-maven-3.2.2-bin.zip && \
+RUN wget --progress=dot:mega -O /tmp/apache-maven-3.2.2-bin.zip https://archive.apache.org/dist/maven/binaries/apache-maven-3.2.2-bin.zip && \
 	mkdir -p /home/jenkins/tools/hudson.tasks.Maven_MavenInstallation && \
 	cd /home/jenkins/tools/hudson.tasks.Maven_MavenInstallation && \
 	unzip /tmp/apache-maven-3.2.2-bin.zip && \
@@ -37,6 +36,9 @@ RUN wget -O /usr/local/bin/lein https://raw.githubusercontent.com/technomancy/le
     mkdir -p ~jenkins/.lein/self-installs && \
     wget --progress=dot:mega -O ~jenkins/.lein/self-installs/leiningen-2.7.1-standalone.jar \
         https://github.com/technomancy/leiningen/releases/download/2.7.1/leiningen-2.7.1-standalone.zip
+
+# install lumo
+RUN npm install -g lumo-cljs
 
 # install rancher-compose
 # we use a subdirectory because the rancher-compose tar file includes an entry
