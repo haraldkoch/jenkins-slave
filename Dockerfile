@@ -24,7 +24,7 @@ RUN adduser jenkins
 RUN echo "jenkins:jenkins" | chpasswd
 
 # install apache maven
-RUN wget --progress=dot:mega -O /tmp/apache-maven-3.2.2-bin.zip http://archive.apache.org/dist/maven/binaries/apache-maven-3.2.2-bin.zip && \
+RUN wget --progress=dot:mega -O /tmp/apache-maven-3.2.2-bin.zip https://archive.apache.org/dist/maven/binaries/apache-maven-3.2.2-bin.zip && \
 	mkdir -p /home/jenkins/tools/hudson.tasks.Maven_MavenInstallation && \
 	cd /home/jenkins/tools/hudson.tasks.Maven_MavenInstallation && \
 	unzip /tmp/apache-maven-3.2.2-bin.zip && \
