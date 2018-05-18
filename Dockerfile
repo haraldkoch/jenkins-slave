@@ -10,7 +10,7 @@ ENTRYPOINT [ "/entrypoint.sh" ]
 RUN yum update -y && \
     yum -y install epel-release && \
     yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo && \
-    yum -y install ansible docker-ce git sudo wget unzip openssh-server java-1.7.0-openjdk-devel java-1.8.0-openjdk-devel nodejs && \
+    yum -y install ansible docker-ce git sudo wget unzip openssh-server java-1.7.0-openjdk-devel java-1.8.0-openjdk-devel jq nodejs && \
     yum clean all
 
 # Install a basic SSH server
@@ -36,7 +36,10 @@ RUN wget -O /usr/local/bin/lein https://raw.githubusercontent.com/technomancy/le
     chmod +x /usr/local/bin/lein && \
     mkdir -p ~jenkins/.lein/self-installs && \
     wget --progress=dot:mega -O ~jenkins/.lein/self-installs/leiningen-2.7.1-standalone.jar \
-        https://github.com/technomancy/leiningen/releases/download/2.7.1/leiningen-2.7.1-standalone.zip
+        https://github.com/technomancy/leiningen/releases/download/2.7.1/leiningen-2.7.1-standalone.zip && \
+    wget --progress=dot:mega -O ~jenkins/.lein/self-installs/leiningen-2.8.1-standalone.jar \
+        https://github.com/technomancy/leiningen/releases/download/2.8.1/leiningen-2.8.1-standalone.zip
+
 
 # install lumo
 RUN npm install -g lumo-cljs
@@ -44,12 +47,12 @@ RUN npm install -g lumo-cljs
 # install rancher-compose
 # we use a subdirectory because the rancher-compose tar file includes an entry
 # for "."; extracting it as root disables write access to /tmp. Craziness!!
-RUN wget --progress=dot:mega -O /tmp/rancher-compose-linux-amd64-v0.12.3.tar.gz https://github.com/rancher/rancher-compose/releases/download/v0.12.3/rancher-compose-linux-amd64-v0.12.3.tar.gz && \
+RUN wget --progress=dot:mega -O /tmp/rancher-compose-linux-amd64-v0.12.5.tar.gz https://github.com/rancher/rancher-compose/releases/download/v0.12.5/rancher-compose-linux-amd64-v0.12.5.tar.gz && \
     mkdir /tmp/rc && \
-    tar -C /tmp/rc -xf /tmp/rancher-compose-linux-amd64-v0.12.3.tar.gz && \
-    /bin/mv /tmp/rc/rancher-compose-v0.12.3/rancher-compose /usr/local/bin/rancher-compose && \
+    tar -C /tmp/rc -xf /tmp/rancher-compose-linux-amd64-v0.12.5.tar.gz && \
+    /bin/mv /tmp/rc/rancher-compose-v0.12.5/rancher-compose /usr/local/bin/rancher-compose && \
     chmod +x /usr/local/bin/rancher-compose && \
-    /bin/rm -rf /tmp/rc /tmp/rancher-compose-linux-amd64-v0.12.3.tar.gz
+    /bin/rm -rf /tmp/rc /tmp/rancher-compose-linux-amd64-v0.12.5.tar.gz
 
 COPY VERSION /home/jenkins
 RUN chown -R jenkins.jenkins /home/jenkins
