@@ -44,15 +44,6 @@ RUN wget -O /usr/local/bin/lein https://raw.githubusercontent.com/technomancy/le
 # install lumo
 RUN npm install -g lumo-cljs
 
-# install rancher-compose
-# we use a subdirectory because the rancher-compose tar file includes an entry
-# for "."; extracting it as root disables write access to /tmp. Craziness!!
-RUN wget --progress=dot:mega -O /tmp/rancher-compose-linux-amd64-v0.12.5.tar.gz https://github.com/rancher/rancher-compose/releases/download/v0.12.5/rancher-compose-linux-amd64-v0.12.5.tar.gz && \
-    mkdir /tmp/rc && \
-    tar -C /tmp/rc -xf /tmp/rancher-compose-linux-amd64-v0.12.5.tar.gz && \
-    /bin/mv /tmp/rc/rancher-compose-v0.12.5/rancher-compose /usr/local/bin/rancher-compose && \
-    chmod +x /usr/local/bin/rancher-compose && \
-    /bin/rm -rf /tmp/rc /tmp/rancher-compose-linux-amd64-v0.12.5.tar.gz
-
 COPY VERSION /home/jenkins
+
 RUN chown -R jenkins.jenkins /home/jenkins
