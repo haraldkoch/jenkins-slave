@@ -40,10 +40,6 @@ RUN wget -O /usr/local/bin/lein https://raw.githubusercontent.com/technomancy/le
     wget --progress=dot:mega -O ~jenkins/.lein/self-installs/leiningen-2.8.1-standalone.jar \
         https://github.com/technomancy/leiningen/releases/download/2.8.1/leiningen-2.8.1-standalone.zip
 
-
-# install lumo
-RUN npm install -g lumo-cljs
-
 COPY VERSION /home/jenkins
 
 RUN chown -R jenkins.jenkins /home/jenkins
