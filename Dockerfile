@@ -10,7 +10,7 @@ ENTRYPOINT [ "/entrypoint.sh" ]
 RUN yum update -y && \
     yum -y install epel-release && \
     yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo && \
-    yum -y install ansible docker-ce git sudo wget unzip openssh-server java-1.7.0-openjdk-devel java-1.8.0-openjdk-devel jq nodejs && \
+    yum -y install ansible docker-ce git python-dns sudo wget unzip openssh-server java-1.7.0-openjdk-devel java-1.8.0-openjdk-devel jq nodejs && \
     yum clean all
 
 # Install a basic SSH server
