@@ -32,13 +32,13 @@ RUN wget --progress=dot:mega -O /tmp/apache-maven-3.2.2-bin.zip https://archive.
 	rm /tmp/apache-maven-3.2.2-bin.zip
 
 # install leiningen - Clojure build tool
-RUN wget -O /usr/local/bin/lein https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein && \
-    chmod +x /usr/local/bin/lein && \
-    mkdir -p ~jenkins/.lein/self-installs && \
-    wget --progress=dot:mega -O ~jenkins/.lein/self-installs/leiningen-2.7.1-standalone.jar \
-        https://github.com/technomancy/leiningen/releases/download/2.7.1/leiningen-2.7.1-standalone.zip && \
-    wget --progress=dot:mega -O ~jenkins/.lein/self-installs/leiningen-2.8.1-standalone.jar \
-        https://github.com/technomancy/leiningen/releases/download/2.8.1/leiningen-2.8.1-standalone.zip
+RUN mkdir -p /usr/local/bin /usr/share/jenkins && chmod 755 /usr/local/bin /usr/share/jenkins \
+  && curl -fsSLo /usr/local/bin/lein https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein \
+  && chmod 755 /usr/local/bin/lein \
+  && curl --create-dirs -fsSLo /usr/share/jenkins/leiningen-2.7.1-standalone.jar https://github.com/technomancy/leiningen/releases/download/2.7.1/leiningen-2.7.1-standalone.zip \
+  && chmod 644 /usr/share/jenkins/leiningen-2.7.1-standalone.jar \
+  && curl --create-dirs -fsSLo /usr/share/jenkins/leiningen-2.8.1-standalone.jar https://github.com/technomancy/leiningen/releases/download/2.8.1/leiningen-2.8.1-standalone.zip \
+  && chmod 644 /usr/share/jenkins/leiningen-2.8.1-standalone.jar
 
 COPY VERSION /home/jenkins
 

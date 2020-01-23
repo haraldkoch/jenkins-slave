@@ -2,7 +2,7 @@ USERNAME=haraldkoch
 IMAGE=jenkins-slave
 VERSION=`cat VERSION`
 
-all:
+build:
 	docker build -t ${USERNAME}/${IMAGE}:${VERSION}  -t ${USERNAME}/${IMAGE}:latest .
 
 update:
