@@ -25,11 +25,14 @@ RUN adduser jenkins
 RUN echo "jenkins:jenkins" | chpasswd
 
 # install apache maven
-RUN wget --progress=dot:mega -O /tmp/apache-maven-3.2.2-bin.zip https://archive.apache.org/dist/maven/binaries/apache-maven-3.2.2-bin.zip && \
+RUN	wget --progress=dot:mega -O /tmp/apache-maven-3.2.2-bin.tar.gz https://archive.apache.org/dist/maven/binaries/apache-maven-3.2.2-bin.tar.gz && \
+	wget --progress=dot:mega -O /tmp/apache-maven-3.6.3-bin.tar.gz https://archive.apache.org/dist/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz && \
 	mkdir -p /home/jenkins/tools/hudson.tasks.Maven_MavenInstallation && \
 	cd /home/jenkins/tools/hudson.tasks.Maven_MavenInstallation && \
-	unzip /tmp/apache-maven-3.2.2-bin.zip && \
-	rm /tmp/apache-maven-3.2.2-bin.zip
+        tar -xf /tmp/apache-maven-3.2.2-bin.tar.gz && \
+        tar -xf /tmp/apache-maven-3.6.3-bin.tar.gz && \
+	rm /tmp/apache-maven-3.2.2-bin.tar.gz && \
+	rm /tmp/apache-maven-3.6.3-bin.tar.gz
 
 # install leiningen - Clojure build tool
 RUN mkdir -p /usr/local/bin /usr/share/jenkins && chmod 755 /usr/local/bin /usr/share/jenkins \
