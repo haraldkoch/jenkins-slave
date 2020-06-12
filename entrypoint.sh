@@ -10,6 +10,9 @@ if [ -r /var/run/docker.sock ] ; then
 
 fi
 
+# cleanup jenkins .ssh permissions (mainly for kubernetes)
+chown -R jenkins.jenkins /home/jenkins/.ssh
+chmod 600 /home/jenkins/.ssh/id_{rsa,ed25519}
 
 # generate host keys if not present
 ssh-keygen -A
