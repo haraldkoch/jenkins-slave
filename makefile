@@ -13,3 +13,7 @@ push:
 
 release:
 	./release.sh ${USERNAME} ${IMAGE} patch
+
+test:
+	docker build -t ${USERNAME}/${IMAGE}:test .
+	docker push ${USERNAME}/${IMAGE}:test
